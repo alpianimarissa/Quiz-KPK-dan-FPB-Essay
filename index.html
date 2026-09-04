@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif KPK & FPB - Kelas 5 SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Family -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F3F4F6;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .pulse-active {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2.5 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid fa-calculator text-2xl text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight leading-tight">Kuis Matematika: KPK & FPB</h1>
+                    <p class="text-xs text-indigo-200">Khusus Kelas 5 SD • 30 Soal Essay</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <div class="hidden sm:flex items-center bg-indigo-700/60 px-3 py-1.5 rounded-lg border border-indigo-500/30 text-xs">
+                    <i class="fa-solid fa-floppy-disk text-emerald-400 mr-1.5 text-sm"></i>
+                    <span>Tersimpan Otomatis</span>
+                </div>
+                <button onclick="toggleSound()" id="soundBtn" class="bg-indigo-500 hover:bg-indigo-400 p-2.5 rounded-xl transition text-white text-sm flex items-center justify-center w-10 h-10" title="Efek Suara">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="confirmReset()" class="bg-rose-500 hover:bg-rose-600 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 shadow-md">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Ulangi Kuis</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Side: Main Question Card & Stats -->
+        <div class="lg:col-span-8 flex flex-col space-y-5">
+            
+            <!-- Progress Bar Card -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">Progres Belajar</span>
+                        <span id="progressText" class="text-xs font-semibold text-slate-500">0 dari 30 Terjawab</span>
+                    </div>
+                    <span id="scoreBadge" class="text-xs sm:text-sm font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        Skor Saat Ini: 0
+                    </span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Main Question Box -->
+            <div class="bg-white rounded-2xl p-5 sm:p-7 shadow-md border border-slate-200 flex-1 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-0 opacity-50 pointer-events-none"></div>
+
+                <div class="relative z-10">
+                    <!-- Badges Row -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span id="questionNumBadge" class="bg-indigo-600 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-lg shadow-sm">
+                                Soal No. 1
+                            </span>
+                            <span id="typeBadge" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md border border-amber-200">
+                                KPK
+                            </span>
+                            <span id="categoryBadge" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md border border-blue-200">
+                                Soal Langsung
+                            </span>
+                        </div>
+                        <div id="statusBadge" class="hidden text-xs font-bold px-3 py-1 rounded-full flex items-center space-x-1">
+                            <!-- JS Populated -->
+                        </div>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="my-4">
+                        <p id="questionText" class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 leading-relaxed min-h-[70px]">
+                            <!-- JS Populated -->
+                        </p>
+                    </div>
+
+                    <!-- Answer Input Form -->
+                    <form id="quizForm" onsubmit="handleAnswerSubmit(event)" class="mt-6">
+                        <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-2">
+                            Jawaban Kamu (Ketik angka hasilnya):
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="relative flex-1">
+                                <input type="text" id="answerInput" autocomplete="off" placeholder="Masukkan jawaban angka..." class="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition text-base font-bold text-slate-800 bg-slate-50 focus:bg-white" required>
+                                <span id="unitText" class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400 pointer-events-none"></span>
+                            </div>
+                            <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Cek Jawaban</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Feedback Banner -->
+                    <div id="feedbackBanner" class="hidden mt-5 p-4 rounded-xl border transition-all">
+                        <div class="flex items-start space-x-3">
+                            <div id="feedbackIcon" class="text-2xl mt-0.5"></div>
+                            <div class="flex-1">
+                                <h4 id="feedbackTitle" class="font-bold text-sm sm:text-base mb-1"></h4>
+                                <p id="feedbackText" class="text-xs sm:text-sm leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explanation Box (Pembahasan) -->
+                    <div id="explanationBox" class="hidden mt-4 bg-indigo-50/80 border border-indigo-200 rounded-xl p-4 text-xs sm:text-sm text-indigo-950">
+                        <div class="flex items-center space-x-2 font-bold text-indigo-900 mb-2 border-b border-indigo-200/60 pb-2">
+                            <i class="fa-solid fa-graduation-cap text-indigo-600 text-base"></i>
+                            <span>Pembahasan Lengkap:</span>
+                        </div>
+                        <div id="explanationContent" class="space-y-1.5 whitespace-pre-line font-medium leading-relaxed">
+                            <!-- JS Populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next / Prev Controls -->
+                <div class="relative z-10 pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                    <button onclick="navigateQuestion(-1)" id="prevBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Sebelumnya</span>
+                    </button>
+                    
+                    <span id="questionCounter" class="text-xs font-bold text-slate-400">1 / 30</span>
+
+                    <button onclick="navigateQuestion(1)" id="nextBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm transition flex items-center space-x-2 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                        <span>Berikutnya</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Side: Navigation Grid & Filter -->
+        <div class="lg:col-span-4 flex flex-col space-y-5">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col h-full">
+                
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 text-sm sm:text-base flex items-center space-x-2">
+                        <i class="fa-solid fa-th-large text-indigo-600"></i>
+                        <span>Navigasi Soal</span>
+                    </h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-md">30 Soal</span>
+                </div>
+
+                <!-- Legend Filter Buttons -->
+                <div class="grid grid-cols-2 gap-1.5 mb-4 text-xs font-medium">
+                    <button onclick="filterGrid('all')" id="filter-all" class="filter-btn bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-1.5 rounded-lg text-center font-bold">Semua (30)</button>
+                    <button onclick="filterGrid('unanswered')" id="filter-unanswered" class="filter-btn bg-slate-50 border border-slate-200 text-slate-600 px-2 py-1.5 rounded-lg text-center">Belum (30)</button>
+                    <button onclick="filterGrid('correct')" id="filter-correct" class="filter-btn bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-1.5 rounded-lg text-center">Benar (0)</button>
+                    <button onclick="filterGrid('incorrect')" id="filter-incorrect" class="filter-btn bg-rose-50 border border-rose-200 text-rose-700 px-2 py-1.5 rounded-lg text-center">Salah (0)</button>
+                </div>
+
+                <!-- Grid Buttons (1-30) -->
+                <div id="gridContainer" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2.5 my-2 max-h-[380px] overflow-y-auto custom-scrollbar p-1">
+                    <!-- JS Generated Grid Buttons -->
+                </div>
+
+                <!-- Summary Status Indicators -->
+                <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2 inline-block"></span>Benar (+3.33 poin)</span>
+                        <span id="summaryCorrect" class="font-bold text-slate-700">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-rose-500 mr-2 inline-block"></span>Salah (0 poin)</span>
+                        <span id="summaryIncorrect" class="font-bold text-slate-700">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-slate-300 mr-2 inline-block"></span>Belum Dijawab</span>
+                        <span id="summaryUnanswered" class="font-bold text-slate-700">30</span>
+                    </div>
+                </div>
+
+                <!-- Final Action Button -->
+                <div class="mt-auto pt-4">
+                    <button onclick="showFinalReport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-trophy text-yellow-300"></i>
+                        <span>Lihat Rekap Hasil</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Kuis Interaktif Matematika SD Kelas 5 • Materi KPK & FPB • Fitur Penyimpanan Otomatis Aktif
+        </div>
+    </footer>
+
+    <!-- Modal Reset Confirmation -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100 text-center transform transition-all scale-95 opacity-100">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Ulangi Kuis dari Awal?</h3>
+            <p class="text-xs text-slate-600 mb-6">
+                Semua jawaban dan skor yang tersimpan di perangkat ini akan dihapus. Kamu yakin ingin memulai dari soal nomor 1 lagi?
+            </p>
+            <div class="flex space-x-3">
+                <button onclick="closeResetModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">Batal</button>
+                <button onclick="executeReset()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition">Ya, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Final Report -->
+    <div id="reportModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center relative overflow-hidden my-8">
+            <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+            <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner border border-amber-200">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <h2 class="text-2xl font-extrabold text-slate-800 mb-1">Laporan Hasil Kuis</h2>
+            <p class="text-xs text-slate-500 mb-6">Matematika Kelas 5 SD - KPK & FPB</p>
+
+            <!-- Big Score Circle -->
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nilai Akhir Kamu</div>
+                <div id="finalScoreDisplay" class="text-5xl font-black text-indigo-600 my-1">0</div>
+                <div id="gradeTitle" class="text-xs font-bold text-slate-600 mt-1">Selesai 0 dari 30 Soal</div>
+            </div>
+
+            <!-- Stats breakdown -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                    <div class="text-xs text-emerald-700 font-medium">Benar</div>
+                    <div id="reportCorrect" class="text-xl font-black text-emerald-600">0</div>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-3">
+                    <div class="text-xs text-rose-700 font-medium">Salah</div>
+                    <div id="reportIncorrect" class="text-xl font-black text-rose-600">0</div>
+                </div>
+                <div class="bg-slate-100 border border-slate-200 rounded-xl p-3">
+                    <div class="text-xs text-slate-600 font-medium">Belum</div>
+                    <div id="reportUnanswered" class="text-xl font-black text-slate-600">0</div>
+                </div>
+            </div>
+
+            <!-- Feedback Message -->
+            <p id="reportFeedbackMsg" class="text-xs sm:text-sm text-slate-700 font-medium bg-indigo-50 p-3 rounded-xl border border-indigo-100 mb-6 leading-relaxed">
+                <!-- JS Populated -->
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="closeReportModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs sm:text-sm transition">
+                    Kembali ke Soal
+                </button>
+                <button onclick="closeReportModal(); confirmReset();" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Coba Lagi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // Data Soal 30 Butir (Soal Langsung + Soal Cerita)
+        // ----------------------------------------------------
+        const questionsData = [
+            {
+                id: 1,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 12 dan 18?",
+                answer: 6,
+                unit: "",
+                explanation: "Faktor dari 12 = 1, 2, 3, 4, 6, 12\nFaktor dari 18 = 1, 2, 3, 6, 9, 18\nFaktor persekutuan (faktor yang sama) = 1, 2, 3, 6\nFaktor Persekutuan Terbesar (FPB) = 6."
+            },
+            {
+                id: 2,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Berapakah KPK dari 6 dan 8?",
+                answer: 24,
+                unit: "",
+                explanation: "Kelipatan 6 = 6, 12, 18, 24, 30, 36, ...\nKelipatan 8 = 8, 16, 24, 32, 40, ...\nKelipatan Persekutuan Terkecil (KPK) = 24."
+            },
+            {
+                id: 3,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Tentukan FPB dari 24 dan 36!",
+                answer: 12,
+                unit: "",
+                explanation: "Faktor 24 = 1, 2, 3, 4, 6, 8, 12, 24\nFaktor 36 = 1, 2, 3, 4, 6, 9, 12, 18, 36\nFaktor yang sama & terbesar (FPB) = 12."
+            },
+            {
+                id: 4,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Tentukan KPK dari 12 dan 15!",
+                answer: 60,
+                unit: "",
+                explanation: "Kelipatan 12 = 12, 24, 36, 48, 60, 72, ...\nKelipatan 15 = 15, 30, 45, 60, 75, ...\nKelipatan Persekutuan Terkecil (KPK) = 60."
+            },
+            {
+                id: 5,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 15 dan 25?",
+                answer: 5,
+                unit: "",
+                explanation: "Faktor 15 = 1, 3, 5, 15\nFaktor 25 = 1, 5, 25\nFaktor Persekutuan Terbesar (FPB) = 5."
+            },
+            {
+                id: 6,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Berapakah KPK dari 9 dan 12?",
+                answer: 36,
+                unit: "",
+                explanation: "Kelipatan 9 = 9, 18, 27, 36, 45, ...\nKelipatan 12 = 12, 24, 36, 48, ...\nKPK = 36."
+            },
+            {
+                id: 7,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Tentukan FPB dari 30 dan 45!",
+                answer: 15,
+                unit: "",
+                explanation: "Faktor 30 = 1, 2, 3, 5, 6, 10, 15, 30\nFaktor 45 = 1, 3, 5, 9, 15, 45\nFPB = 15."
+            },
+            {
+                id: 8,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Berapakah KPK dari 10 dan 25?",
+                answer: 50,
+                unit: "",
+                explanation: "Kelipatan 10 = 10, 20, 30, 40, 50, 60, ...\nKelipatan 25 = 25, 50, 75, ...\nKPK = 50."
+            },
+            {
+                id: 9,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 16 dan 24?",
+                answer: 8,
+                unit: "",
+                explanation: "Faktor 16 = 1, 2, 4, 8, 16\nFaktor 24 = 1, 2, 3, 4, 6, 8, 12, 24\nFPB = 8."
+            },
+            {
+                id: 10,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Tentukan KPK dari 14 dan 21!",
+                answer: 42,
+                unit: "",
+                explanation: "Kelipatan 14 = 14, 28, 42, 56, ...\nKelipatan 21 = 21, 42, 63, ...\nKPK = 42."
+            },
+            {
+                id: 11,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 40 dan 60?",
+                answer: 20,
+                unit: "",
+                explanation: "Faktor 40 = 1, 2, 4, 5, 8, 10, 20, 40\nFaktor 60 = 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60\nFPB = 20."
+            },
+            {
+                id: 12,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Tentukan KPK dari 15 dan 20!",
+                answer: 60,
+                unit: "",
+                explanation: "Kelipatan 15 = 15, 30, 45, 60, 75, ...\nKelipatan 20 = 20, 40, 60, 80, ...\nKPK = 60."
+            },
+            {
+                id: 13,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 3 angka: 20, 30, dan 40?",
+                answer: 10,
+                unit: "",
+                explanation: "Faktor 20 = 1, 2, 4, 5, 10, 20\nFaktor 30 = 1, 2, 3, 5, 6, 10, 15, 30\nFaktor 40 = 1, 2, 4, 5, 8, 10, 20, 40\nFaktor yang sama pada ketiganya = 1, 2, 5, 10\nFPB = 10."
+            },
+            {
+                id: 14,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Berapakah KPK dari 3 angka: 4, 6, dan 8?",
+                answer: 24,
+                unit: "",
+                explanation: "Kelipatan 4 = 4, 8, 12, 16, 20, 24, 28...\nKelipatan 6 = 6, 12, 18, 24, 30...\nKelipatan 8 = 8, 16, 24, 32...\nKelipatan persekutuan pertama yang muncul pada ketiganya = 24."
+            },
+            {
+                id: 15,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Tentukan FPB dari 18, 27, dan 36!",
+                answer: 9,
+                unit: "",
+                explanation: "Faktor 18 = 1, 2, 3, 6, 9, 18\nFaktor 27 = 1, 3, 9, 27\nFaktor 36 = 1, 2, 3, 4, 6, 9, 12, 18, 36\nFPB ketiga bilangan = 9."
+            },
+            {
+                id: 16,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Ali berenang setiap 4 hari sekali dan Budi berenang setiap 6 hari sekali. Jika hari ini mereka berenang bersama, berapa hari lagi mereka akan berenang bersama untuk yang kedua kalinya?",
+                answer: 12,
+                unit: "hari",
+                explanation: "Soal ini mencari jadwal bersamaan berikutnya, maka gunakan KPK.\nKelipatan 4 = 4, 8, 12, 16...\nKelipatan 6 = 6, 12, 18...\nKPK dari 4 dan 6 = 12.\nJadi mereka berenang bersama lagi 12 hari lagi."
+            },
+            {
+                id: 17,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Ibu memiliki 20 buah apel dan 30 buah jeruk. Ibu ingin membagikan buah-buah tersebut ke dalam beberapa kantong plastik dengan jumlah apel dan jeruk yang sama di setiap kantong. Berapa jumlah kantong plastik terbanyak yang dibutuhkan Ibu?",
+                answer: 10,
+                unit: "kantong",
+                explanation: "Soal pembagian barang sama banyak ke beberapa kelompok menggunakan FPB.\nFPB dari 20 dan 30:\n20 = 2 × 2 × 5\n30 = 2 × 3 × 5\nFPB = 2 × 5 = 10 kantong."
+            },
+            {
+                id: 18,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Lampu merah menyala setiap 8 detik sekali dan lampu hijau menyala setiap 12 detik sekali. Setiap berapa detik kedua lampu tersebut menyala secara bersamaan?",
+                answer: 24,
+                unit: "detik",
+                explanation: "Gunakan KPK dari 8 dan 12.\nKelipatan 8 = 8, 16, 24, 32...\nKelipatan 12 = 12, 24, 36...\nKPK(8, 12) = 24 detik."
+            },
+            {
+                id: 19,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Ayah membeli 24 pensil dan 32 buku tulis. Ayah akan membagikannya kepada sebanyak-banyaknya anak panti asuhan dengan bagian yang sama rata. Berapa anak terbanyak yang dapat menerima paket tersebut?",
+                answer: 8,
+                unit: "anak",
+                explanation: "Cari FPB dari 24 dan 32.\nFaktor 24 = 1, 2, 3, 4, 6, 8, 12, 24\nFaktor 32 = 1, 2, 4, 8, 16, 32\nFPB = 8 anak."
+            },
+            {
+                id: 20,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Bus A berangkat dari terminal setiap 15 menit sekali, sedangkan Bus B berangkat setiap 20 menit sekali. Berapa menit lagi kedua bus tersebut akan berangkat bersama-sama dari terminal?",
+                answer: 60,
+                unit: "menit",
+                explanation: "Cari KPK dari 15 dan 20.\nKelipatan 15 = 15, 30, 45, 60, 75...\nKelipatan 20 = 20, 40, 60, 80...\nKPK = 60 menit."
+            },
+            {
+                id: 21,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Pak Tani memanen 45 buah mangga dan 60 buah rambutan. Buah-buah tersebut akan dimasukkan ke dalam keranjang dengan isi tiap keranjang sama banyak. Berapa jumlah keranjang terbanyak yang dapat dibuat?",
+                answer: 15,
+                unit: "keranjang",
+                explanation: "Cari FPB dari 45 dan 60.\n45 = 3² × 5\n60 = 2² × 3 × 5\nFPB = 3 × 5 = 15 keranjang."
+            },
+            {
+                id: 22,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Siti mengunjungi perpustakaan setiap 5 hari sekali dan Edo setiap 7 hari sekali. Jika mereka bertemu hari ini, berapa hari lagi mereka akan bertemu kembali di perpustakaan?",
+                answer: 35,
+                unit: "hari",
+                explanation: "Karena 5 dan 7 adalah bilangan prima, maka KPK dari 5 dan 7 adalah hasil kalinya.\nKPK = 5 × 7 = 35 hari."
+            },
+            {
+                id: 23,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Untuk merayakan ulang tahun, kakek menyiapkan 36 balon merah dan 48 balon biru. Balon-balon tersebut akan diikat menjadi beberapa kelompok dengan jumlah warna sama tiap kelompok. Berapa kelompok terbanyak yang dapat dibuat?",
+                answer: 12,
+                unit: "kelompok",
+                explanation: "Cari FPB dari 36 dan 48.\n36 = 12 × 3\n48 = 12 × 4\nFPB = 12 kelompok."
+            },
+            {
+                id: 24,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Pos ronda Kampung A membunyikan kentongan setiap 10 menit sekali, sedangkan Pos ronda Kampung B setiap 15 menit sekali. Setiap berapa menit kedua pos ronda membunyikan kentongan bersamaan?",
+                answer: 30,
+                unit: "menit",
+                explanation: "Cari KPK dari 10 dan 15.\nKelipatan 10 = 10, 20, 30, 40...\nKelipatan 15 = 15, 30, 45...\nKPK = 30 menit."
+            },
+            {
+                id: 25,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Sebuah kelas terdiri dari 18 siswa laki-laki dan 24 siswa perempuan. Ibu guru ingin membagi siswa menjadi beberapa kelompok diskusi dengan jumlah laki-laki dan perempuan sama banyak. Berapa kelompok diskusi terbanyak yang terbentuk?",
+                answer: 6,
+                unit: "kelompok",
+                explanation: "Cari FPB dari 18 dan 24.\nFaktor 18 = 1, 2, 3, 6, 9, 18\nFaktor 24 = 1, 2, 3, 4, 6, 8, 12, 24\nFPB = 6 kelompok."
+            },
+            {
+                id: 26,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 48 dan 72?",
+                answer: 24,
+                unit: "",
+                explanation: "48 = 2⁴ × 3\n72 = 2³ × 3²\nFPB = 2³ × 3 = 8 × 3 = 24."
+            },
+            {
+                id: 27,
+                type: "KPK",
+                category: "Soal Langsung",
+                question: "Tentukan KPK dari 18 dan 24!",
+                answer: 72,
+                unit: "",
+                explanation: "18 = 2 × 3²\n24 = 2³ × 3\nKPK = 2³ × 3² = 8 × 9 = 72."
+            },
+            {
+                id: 28,
+                type: "FPB",
+                category: "Soal Cerita",
+                question: "Panitia perlombaan memiliki 28 piala kayu dan 42 piala kaca. Piala tersebut akan ditata di beberapa meja hadiah secara merata. Berapa meja paling banyak yang digunakan?",
+                answer: 14,
+                unit: "meja",
+                explanation: "Cari FPB dari 28 dan 42.\n28 = 2² × 7\n42 = 2 × 3 × 7\nFPB = 2 × 7 = 14 meja."
+            },
+            {
+                id: 29,
+                type: "KPK",
+                category: "Soal Cerita",
+                question: "Ayah menyiram tanaman mawar setiap 3 hari sekali dan tanaman melati setiap 4 hari sekali. Jika hari ini disiram bersamaan, berapa hari lagi Ayah akan menyiram kedua tanaman tersebut secara bersamaan kembali?",
+                answer: 12,
+                unit: "hari",
+                explanation: "KPK dari 3 dan 4:\nKelipatan 3 = 3, 6, 9, 12, 15...\nKelipatan 4 = 4, 8, 12, 16...\nKPK = 12 hari."
+            },
+            {
+                id: 30,
+                type: "FPB",
+                category: "Soal Langsung",
+                question: "Berapakah FPB dari 32, 48, dan 64?",
+                answer: 16,
+                unit: "",
+                explanation: "32 = 2⁵\n48 = 2⁴ × 3\n64 = 2⁶\nFPB = 2⁴ = 16."
+            }
+        ];
+
+        // ----------------------------------------------------
+        // State Application & Persistence
+        // ----------------------------------------------------
+        const STORAGE_KEY = 'kuis_kpk_fpb_sd_v1';
+        let currentIndex = 0;
+        let activeFilter = 'all';
+        let isSoundEnabled = true;
+
+        // User answers state array
+        let userState = Array.from({ length: 30 }, () => ({
+            userAnswer: '',
+            isCorrect: null,
+            status: 'unanswered'
+        }));
+
+        // Load saved state from LocalStorage
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length === 30) {
+                        userState = parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn('Gagal memuat penyimpanan lokal', e);
+            }
+        }
+
+        // Save current state to LocalStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userState));
+            } catch (e) {
+                console.warn('Gagal menyimpan progres', e);
+            }
+        }
+
+        // Web Audio API Sound Generator
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.15); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.3); // G5
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
+                    osc.frequency.setValueAtTime(180, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.35);
+                }
+            } catch (e) {
+                // Audio not allowed or unsupported
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const soundBtn = document.getElementById('soundBtn');
+            if (isSoundEnabled) {
+                soundBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                soundBtn.classList.replace('bg-slate-500', 'bg-indigo-500');
+            } else {
+                soundBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                soundBtn.classList.replace('bg-indigo-500', 'bg-slate-500');
+            }
+        }
+
+        // ----------------------------------------------------
+        // UI Renderers
+        // ----------------------------------------------------
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const state = userState[idx];
+                
+                // Filter logic
+                if (activeFilter === 'correct' && state.status !== 'correct') return;
+                if (activeFilter === 'incorrect' && state.status !== 'incorrect') return;
+                if (activeFilter === 'unanswered' && state.status !== 'unanswered') return;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectQuestion(idx);
+
+                let baseClass = "h-11 w-full rounded-xl font-extrabold text-xs flex items-center justify-center transition-all relative border ";
+
+                if (idx === currentIndex) {
+                    baseClass += "ring-4 ring-indigo-300 ring-offset-1 z-10 scale-105 ";
+                }
+
+                if (state.status === 'correct') {
+                    baseClass += "bg-emerald-500 text-white border-emerald-600 shadow-sm";
+                } else if (state.status === 'incorrect') {
+                    baseClass += "bg-rose-500 text-white border-rose-600 shadow-sm";
+                } else {
+                    baseClass += "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200";
+                }
+
+                btn.className = baseClass;
+                btn.innerText = idx + 1;
+
+                container.appendChild(btn);
+            });
+
+            updateSummaryStats();
+        }
+
+        function updateSummaryStats() {
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let unansweredCount = 0;
+
+            userState.forEach(s => {
+                if (s.status === 'correct') correctCount++;
+                else if (s.status === 'incorrect') incorrectCount++;
+                else unansweredCount++;
+            });
+
+            const totalAnswered = correctCount + incorrectCount;
+            const score = Math.round((correctCount / 30) * 100);
+
+            document.getElementById('summaryCorrect').innerText = correctCount;
+            document.getElementById('summaryIncorrect').innerText = incorrectCount;
+            document.getElementById('summaryUnanswered').innerText = unansweredCount;
+
+            document.getElementById('progressText').innerText = `${totalAnswered} dari 30 Terjawab`;
+            document.getElementById('progressBar').style.width = `${(totalAnswered / 30) * 100}%`;
+            document.getElementById('scoreBadge').innerText = `Skor Saat Ini: ${score}`;
+
+            // Update filter buttons text counts
+            document.getElementById('filter-all').innerText = `Semua (30)`;
+            document.getElementById('filter-unanswered').innerText = `Belum (${unansweredCount})`;
+            document.getElementById('filter-correct').innerText = `Benar (${correctCount})`;
+            document.getElementById('filter-incorrect').innerText = `Salah (${incorrectCount})`;
+        }
+
+        function renderQuestion() {
+            const q = questionsData[currentIndex];
+            const state = userState[currentIndex];
+
+            // Badges & Headers
+            document.getElementById('questionNumBadge').innerText = `Soal No. ${q.id}`;
+            document.getElementById('categoryBadge').innerText = q.category;
+            document.getElementById('questionCounter').innerText = `${currentIndex + 1} / 30`;
+
+            const typeBadge = document.getElementById('typeBadge');
+
+            if (q.category === 'Soal Cerita') {
+                // Sembunyikan badge KPK/FPB untuk soal cerita
+                typeBadge.classList.add('hidden');
+                document.getElementById('categoryBadge').className = 'bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md border border-blue-200';
+            } else {
+                // Tampilkan badge KPK/FPB untuk soal langsung
+                typeBadge.classList.remove('hidden');
+                typeBadge.innerText = q.type;
+                if (q.type === 'KPK') {
+                    typeBadge.className = 'bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md border border-amber-200';
+                } else {
+                    typeBadge.className = 'bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-md border border-purple-200';
+                }
+                document.getElementById('categoryBadge').className = 'bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-md border border-slate-200';
+            }
+
+            // Question text & Unit
+            document.getElementById('questionText').innerText = q.question;
+            document.getElementById('unitText').innerText = q.unit || '';
+
+            // Input field setup
+            const answerInput = document.getElementById('answerInput');
+            answerInput.value = state.userAnswer || '';
+
+            // Feedback & Status setup
+            const feedbackBanner = document.getElementById('feedbackBanner');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+            const explanationBox = document.getElementById('explanationBox');
+            const explanationContent = document.getElementById('explanationContent');
+            const statusBadge = document.getElementById('statusBadge');
+
+            if (state.status === 'correct') {
+                statusBadge.classList.remove('hidden');
+                statusBadge.className = "bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-extrabold px-3 py-1 rounded-full flex items-center space-x-1";
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>BENAR</span>';
+
+                feedbackBanner.className = "mt-5 p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 block";
+                feedbackIcon.innerHTML = '🎉';
+                feedbackTitle.innerText = 'Jawaban Kamu Tepat Sekali!';
+                feedbackText.innerText = `Jawaban kamu (${state.userAnswer}) benar. Bagus sekali!`;
+
+                explanationBox.classList.remove('hidden');
+                explanationContent.innerText = q.explanation;
+            } else if (state.status === 'incorrect') {
+                statusBadge.classList.remove('hidden');
+                statusBadge.className = "bg-rose-100 text-rose-800 border border-rose-300 text-xs font-extrabold px-3 py-1 rounded-full flex items-center space-x-1";
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <span>BELUM TEPAT</span>';
+
+                feedbackBanner.className = "mt-5 p-4 rounded-xl border bg-rose-50 border-rose-200 text-rose-900 block";
+                feedbackIcon.innerHTML = '😅';
+                feedbackTitle.innerText = 'Jawaban Belum Tepat';
+                feedbackText.innerText = `Kamu menjawab "${state.userAnswer}". Kunci Jawaban yang benar adalah: ${q.answer} ${q.unit}`;
+
+                explanationBox.classList.remove('hidden');
+                explanationContent.innerText = q.explanation;
+            } else {
+                statusBadge.classList.add('hidden');
+                feedbackBanner.classList.add('hidden');
+                explanationBox.classList.add('hidden');
+            }
+
+            // Button controls state
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === questionsData.length - 1;
+
+            renderGrid();
+        }
+
+        // ----------------------------------------------------
+        // Handlers & Logic
+        // ----------------------------------------------------
+        function selectQuestion(index) {
+            currentIndex = index;
+            renderQuestion();
+        }
+
+        function navigateQuestion(delta) {
+            const newIndex = currentIndex + delta;
+            if (newIndex >= 0 && newIndex < questionsData.length) {
+                currentIndex = newIndex;
+                renderQuestion();
+            }
+        }
+
+        function filterGrid(filterType) {
+            activeFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('font-bold', 'border-indigo-400', 'bg-indigo-50');
+            });
+            document.getElementById(`filter-${filterType}`).classList.add('font-bold');
+            renderGrid();
+        }
+
+        // Clean user input text to extract digits
+        function parseUserAnswer(rawInput) {
+            if (!rawInput) return null;
+            const match = rawInput.trim().match(/\d+/);
+            return match ? parseInt(match[0], 10) : null;
+        }
+
+        function handleAnswerSubmit(e) {
+            e.preventDefault();
+            const rawVal = document.getElementById('answerInput').value;
+            const parsedVal = parseUserAnswer(rawVal);
+
+            if (parsedVal === null) {
+                const inputEl = document.getElementById('answerInput');
+                inputEl.classList.add('border-rose-400', 'bg-rose-50');
+                setTimeout(() => inputEl.classList.remove('border-rose-400', 'bg-rose-50'), 1000);
+                return;
+            }
+
+            const currentQ = questionsData[currentIndex];
+            const isCorrect = (parsedVal === currentQ.answer);
+
+            userState[currentIndex] = {
+                userAnswer: rawVal.trim(),
+                isCorrect: isCorrect,
+                status: isCorrect ? 'correct' : 'incorrect'
+            };
+
+            saveState();
+            playSound(isCorrect ? 'correct' : 'wrong');
+            renderQuestion();
+
+            if (isCorrect && typeof confetti === 'function') {
+                confetti({
+                    particleCount: 30,
+                    spread: 60,
+                    origin: { y: 0.8 }
+                });
+            }
+        }
+
+        // ----------------------------------------------------
+        // Reset Modal Controls
+        // ----------------------------------------------------
+        function confirmReset() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function executeReset() {
+            userState = Array.from({ length: 30 }, () => ({
+                userAnswer: '',
+                isCorrect: null,
+                status: 'unanswered'
+            }));
+            localStorage.removeItem(STORAGE_KEY);
+            currentIndex = 0;
+            closeResetModal();
+            renderQuestion();
+        }
+
+        // ----------------------------------------------------
+        // Final Summary Modal
+        // ----------------------------------------------------
+        function showFinalReport() {
+            let correct = 0;
+            let incorrect = 0;
+            let unanswered = 0;
+
+            userState.forEach(s => {
+                if (s.status === 'correct') correct++;
+                else if (s.status === 'incorrect') incorrect++;
+                else unanswered++;
+            });
+
+            const score = Math.round((correct / 30) * 100);
+
+            document.getElementById('finalScoreDisplay').innerText = score;
+            document.getElementById('reportCorrect').innerText = correct;
+            document.getElementById('reportIncorrect').innerText = incorrect;
+            document.getElementById('reportUnanswered').innerText = unanswered;
+
+            let feedbackMsg = "";
+            if (score === 100) {
+                feedbackMsg = "🌟 LUAR BIASA PERFECT! Kamu menguasai materi KPK dan FPB dengan sangat luar biasa! Pertahankan terus prestasimu ya!";
+            } else if (score >= 80) {
+                feedbackMsg = "👍 HEBAT BANGET! Hasil nilaimu sangat baik. Teruskan berlatih untuk menyempurnakan jawabanmu!";
+            } else if (score >= 60) {
+                feedbackMsg = "CUKUP BAGUS! Kamu sudah memahami konsep dasar KPK & FPB. Pelajari lagi pembahasan pada soal yang salah ya.";
+            } else {
+                feedbackMsg = "JANGAN PATAH SEMANGAT! Cobalah membaca kembali langkah pembahasan di kuis ini dan ulangi lagi. Kamu pasti bisa!";
+            }
+
+            document.getElementById('reportFeedbackMsg').innerText = feedbackMsg;
+            document.getElementById('gradeTitle').innerText = `Selesai ${correct + incorrect} dari 30 Soal`;
+
+            document.getElementById('reportModal').classList.remove('hidden');
+
+            if (score >= 70 && typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        // ----------------------------------------------------
+        // Initialization on Load
+        // ----------------------------------------------------
+        window.onload = function() {
+            loadSavedState();
+            renderQuestion();
+        };
+    </script>
+</body>
+</html>
